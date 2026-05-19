@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Site } from '@/lib/types'
 
 interface Props {
@@ -7,8 +8,26 @@ interface Props {
 }
 
 export default function InstallClient({ site }: Props) {
-  function openSite() {
-    window.location.href = site.url
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
+  const [installed, setInstalled] = useState(false)
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+    }
+    window.addEventListener('beforeinstallprompt', handler)
+    window.addEventListener('appinstalled', () => setInstalled(true))
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
+
+  async function handleInstall() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt()
+      const { outcome } = await deferredPrompt.userChoice
+      if (outcome === 'accepted') setInstalled(true)
+      setDeferredPrompt(null)
+    }
   }
 
   return (
@@ -22,40 +41,40 @@ export default function InstallClient({ site }: Props) {
       </div>
 
       <div className="bg-[#1e293b] rounded-xl p-6 max-w-sm w-full flex flex-col gap-4 border border-slate-700">
-        <p className="text-white font-semibold text-center">How to install</p>
+        {installed ? (
+          <p className="text-emerald-400 font-medium text-center">✓ Installed! Check your home screen.</p>
+        ) : (
+          <>
+            <p className="text-white font-semibold text-center">Install {site.name} as App</p>
 
-        {/* Step 1 */}
-        <div className="flex gap-3 items-start">
-          <span className="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
-          <div>
-            <p className="text-white text-sm font-medium">Open the website</p>
-            <p className="text-slate-400 text-xs mt-0.5">Tap the button below to go to {site.name}</p>
-          </div>
-        </div>
-
-        {/* Step 2 */}
-        <div className="flex gap-3 items-start">
-          <span className="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
-          <div>
-            <p className="text-white text-sm font-medium">Install from browser menu</p>
-            <p className="text-slate-400 text-xs mt-0.5">
-              📱 <strong className="text-slate-300">Android:</strong> Tap ⋮ → "Add to Home Screen"
-            </p>
-            <p className="text-slate-400 text-xs mt-1">
-              🍎 <strong className="text-slate-300">iPhone:</strong> Tap Share → "Add to Home Screen"
-            </p>
-            <p className="text-slate-400 text-xs mt-1">
-              💻 <strong className="text-slate-300">Desktop:</strong> Click ⊕ in address bar
-            </p>
-          </div>
-        </div>
-
-        <button
-          onClick={openSite}
-          className="w-full py-3 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold text-base hover:opacity-90 transition-opacity mt-2"
-        >
-          Open {site.name} →
-        </button>
+            {deferredPrompt ? (
+              <button
+                onClick={handleInstall}
+                className="w-full py-3 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold text-base hover:opacity-90 transition-opacity"
+              >
+                Install App
+              </button>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <div className="flex gap-3 items-start">
+                  <span className="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+                  <p className="text-slate-300 text-sm">Tap your browser menu</p>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <span className="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                  <div className="text-sm">
+                    <p className="text-slate-400">📱 <strong className="text-slate-300">Android Chrome:</strong> Tap ⋮ → "Add to Home Screen"</p>
+                    <p className="text-slate-400 mt-1">🍎 <strong className="text-slate-300">iPhone Safari:</strong> Tap Share → "Add to Home Screen"</p>
+                  </div>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <span className="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+                  <p className="text-slate-300 text-sm">The app will open <strong className="text-white">{site.name}</strong> directly when launched</p>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   )

@@ -16,10 +16,13 @@ export async function GET(
     return NextResponse.json({ error: 'Site not found' }, { status: 404 })
   }
 
+  const origin = new URL(_request.url).origin
+
   const manifest = {
     name: site.name,
     short_name: site.name,
-    start_url: site.url,
+    start_url: `${origin}/${id}/app`,
+    scope: `${origin}/${id}/app`,
     display: 'standalone',
     background_color: '#0f172a',
     theme_color: '#0f172a',
