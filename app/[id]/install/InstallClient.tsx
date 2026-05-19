@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Site } from '@/lib/types'
 
 interface Props {
@@ -8,29 +7,8 @@ interface Props {
 }
 
 export default function InstallClient({ site }: Props) {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
-  const [installed, setInstalled] = useState(false)
-  const [showManual, setShowManual] = useState(false)
-
-  useEffect(() => {
-    const handler = (e: any) => {
-      e.preventDefault()
-      setDeferredPrompt(e)
-    }
-    window.addEventListener('beforeinstallprompt', handler)
-    window.addEventListener('appinstalled', () => setInstalled(true))
-    return () => window.removeEventListener('beforeinstallprompt', handler)
-  }, [])
-
-  async function handleInstall() {
-    if (deferredPrompt) {
-      deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
-      if (outcome === 'accepted') setInstalled(true)
-      setDeferredPrompt(null)
-    } else {
-      setShowManual(true)
-    }
+  function openSite() {
+    window.location.href = site.url
   }
 
   return (
@@ -43,38 +21,42 @@ export default function InstallClient({ site }: Props) {
         <p className="text-slate-400 mt-1 text-sm">{site.url}</p>
       </div>
 
-      <div className="bg-[#1e293b] rounded-xl p-6 max-w-sm w-full text-center border border-slate-700 flex flex-col gap-4">
-        {installed ? (
-          <p className="text-emerald-400 font-medium">✓ Installed successfully!</p>
-        ) : (
-          <>
-            <button
-              onClick={handleInstall}
-              className="w-full py-3 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold text-base hover:opacity-90 transition-opacity"
-            >
-              Install as App
-            </button>
+      <div className="bg-[#1e293b] rounded-xl p-6 max-w-sm w-full flex flex-col gap-4 border border-slate-700">
+        <p className="text-white font-semibold text-center">How to install</p>
 
-            {showManual && (
-              <div className="text-left text-sm text-slate-400 space-y-2 pt-2 border-t border-slate-700">
-                <p className="text-white font-medium text-center mb-2">Install manually:</p>
-                <p>📱 <strong className="text-white">Android Chrome:</strong> Tap ⋮ menu → "Add to Home Screen"</p>
-                <p>🍎 <strong className="text-white">iPhone Safari:</strong> Tap Share → "Add to Home Screen"</p>
-                <p>💻 <strong className="text-white">Desktop Chrome:</strong> Click ⊕ in address bar</p>
-              </div>
-            )}
-          </>
-        )}
+        {/* Step 1 */}
+        <div className="flex gap-3 items-start">
+          <span className="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+          <div>
+            <p className="text-white text-sm font-medium">Open the website</p>
+            <p className="text-slate-400 text-xs mt-0.5">Tap the button below to go to {site.name}</p>
+          </div>
+        </div>
+
+        {/* Step 2 */}
+        <div className="flex gap-3 items-start">
+          <span className="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+          <div>
+            <p className="text-white text-sm font-medium">Install from browser menu</p>
+            <p className="text-slate-400 text-xs mt-0.5">
+              📱 <strong className="text-slate-300">Android:</strong> Tap ⋮ → "Add to Home Screen"
+            </p>
+            <p className="text-slate-400 text-xs mt-1">
+              🍎 <strong className="text-slate-300">iPhone:</strong> Tap Share → "Add to Home Screen"
+            </p>
+            <p className="text-slate-400 text-xs mt-1">
+              💻 <strong className="text-slate-300">Desktop:</strong> Click ⊕ in address bar
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={openSite}
+          className="w-full py-3 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold text-base hover:opacity-90 transition-opacity mt-2"
+        >
+          Open {site.name} →
+        </button>
       </div>
-
-      <a
-        href={site.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-sm text-slate-400 hover:text-white transition-colors underline"
-      >
-        Open {site.name} directly →
-      </a>
     </div>
   )
 }
