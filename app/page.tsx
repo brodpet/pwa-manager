@@ -22,8 +22,8 @@ export default function Dashboard() {
 
   const filtered = sites.filter(
     (s) =>
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.url.toLowerCase().includes(search.toLowerCase())
+      s.name?.toLowerCase().includes(search.toLowerCase()) ||
+      s.url?.toLowerCase().includes(search.toLowerCase())
   )
 
   async function handleSave(input: CreateSiteInput, id?: string) {
