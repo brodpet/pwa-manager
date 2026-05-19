@@ -22,13 +22,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function InstallPage({ params }: Props) {
   const { id } = await params
-  const { data: site } = await supabase
+  const { data: site, error } = await supabase
     .from('sites')
     .select('*')
     .eq('id', id)
     .single()
 
-  if (!site) {
+  if (error || !site) {
     return (
       <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
         <p className="text-slate-400">Site not found.</p>

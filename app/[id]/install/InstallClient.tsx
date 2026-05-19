@@ -10,7 +10,7 @@ interface Props {
 export default function InstallClient({ site }: Props) {
   useEffect(() => {
     window.open(site.url, '_blank')
-  }, [site.url])
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center gap-6 px-4">
